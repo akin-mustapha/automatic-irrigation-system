@@ -1,12 +1,14 @@
 """
-Script reads soil moisture data from a serial port and sends it to an AWS dynamodb table.
+Script reads a single soil moisture data point from a serial port,
+sends it to AWS DynamoDB, closes the serial connection, and exits.
+Designed to be triggered periodically via cron.
 """
 
 import logging
+import time
 from datetime import datetime, timezone
 from uuid import uuid4
 import serial
-import time
 import boto3
 
 logger = logging.getLogger(__name__)
@@ -15,15 +17,14 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-
-dynamodb = boto3.resource("dynamodb", region_name='eu-west-1')
+dynamodb = boto3.resource("dynamodb", region_name="eu-west-1")
 table = dynamodb.Table("plant_sensor_data")
 
 
 def get_serial_connection():
     """
     Establishes a serial connection to the Arduino.
-    Returns the serial connection object.
+    Returns the serial connection object or None.
     """
     port = "/dev/cu.usbmodem11101"  # Update with your serial port
     baud_rate = 9600
@@ -35,7 +36,6 @@ def get_serial_connection():
         return ser
     except serial.SerialException as e:
         logger.error(f"Error connecting to serial port: {e}")
-        time.sleep(2)
         return None
 
 
@@ -61,13 +61,41 @@ def main():
         logger.error("Failed to establish serial connection. Exiting.")
         return
 
-    while True:
-        if ser.in_waiting > 0:
-            line = ser.readline().decode("utf-8").rstrip()
+    # Wait up to 15 seconds for a valid reading from Arduino
+    timeout_seconds = 15
+    start_time = time.time()
+    reading_saved = False
 
-            if line.startswith("Sensor Value:"):
-                sensor_value = int(line.split(":")[1].strip())
-                save_to_dynamodb(sensor_value)
+    try:
+        # Flush old serial data in buffer so we get fresh data
+        ser.reset_input_buffer()
+
+        while time.time() - start_time < timeout_seconds:
+            if ser.in_waiting > 0:
+                line = ser.readline().decode("utf-8", errors="ignore").rstrip()
+
+                if line.startswith("Sensor Value:"):
+                    try:
+                        sensor_value = int(line.split(":")[1].strip())
+                        save_to_dynamodb(sensor_value)
+                        reading_saved = True
+                        break  # Got reading, exit loop
+                    except ValueError as ve:
+                        logger.error(
+                            f"Could not parse sensor value from '{line}': {ve}"
+                        )
+
+            time.sleep(0.1)
+
+        if not reading_saved:
+            logger.warning(
+                f"No valid sensor reading received within {timeout_seconds} seconds."
+            )
+
+    finally:
+        # ALWAYS close the serial port before exiting so cron can run it next time
+        ser.close()
+        logger.info("Serial port closed.")
 
 
 if __name__ == "__main__":
