@@ -11,9 +11,9 @@ void setup()
 void loop()
 {
   sensorValue = analogRead(A0);
-
+  // Send formatted data over Serial every 5 seconds
   Serial.print("Sensor Value: ");
   Serial.println(sensorValue);
 
-  delay(500);
+  delay(5000);
 }

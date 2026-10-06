@@ -28,6 +28,23 @@
 - TinkerCad
 - Arduino IDE
 
+## Setup
+
+- Install python
+- Create python virtual environment
+
+```sh
+cd automatic-irrigation-system
+
+python3 -m venv venv
+
+source ./venv/bin/activate
+
+touch requirements.txt
+
+pip3 install -r requirements.txt
+```
+
 ## Components
 
 - DC Water Pump
