@@ -218,3 +218,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+src/iot_core/connect_device_package.zip
+src/iot_core/plant-sensor-01-Policy
+src/iot_core/plant-sensor-01.cert.pem
+src/iot_core/plant-sensor-01.private.key
+src/iot_core/plant-sensor-01.public.key
+src/iot_core/root-CA.crt
+src/iot_core/keys/connect_device_package.zip
+src/iot_core/keys/plant-sensor-01.cert.pem
+src/iot_core/keys/plant-sensor-01.private.key
+src/iot_core/keys/plant-sensor-01.public.key
+src/iot_core/keys/root-CA.crt
+src/iot_core/sketch.ino
