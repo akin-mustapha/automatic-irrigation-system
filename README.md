@@ -217,10 +217,13 @@ unzip connect_device_package.zip
 
 ## Configure ESP32
 
+[ESP32-S3-DevKitC-1 v1.1](https://docs.espressif.com/projects/esp-idf/en/v5.3.1/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html)
+
 ![ESP32-S3-WROOM-1-N16R8](2A2E4CE1-F4E8-400E-8839-55E202CD4B05.jpeg)
 
-1. Connect micro-controller to breadboard
+![ESP32-S3-DevKitC-1 Pin Layout](image-1.png)
 
+1. Connect micro-controller to breadboard
 
 ## Troubleshooting ESP32
 
@@ -253,4 +256,8 @@ Return to Arduino IDE and click Upload. If it starts writing the firmware, let i
 
 ![aws iot core](image.png)
 
+### Voltage Divider
 
+- Connect resistor in series along side the probe AO to the micro-controller GPIO pin.
+- This allows us to singal from the probe to the micro-controller
+- The voltage divider lets us reduced the current.
